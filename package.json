@@ -1,0 +1,34 @@
+{
+  "name": "slab-hunter",
+  "version": "0.0.0",
+  "description": "Detect Buffer slabs indicative of a memory leak",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holepunchto/slab-hunter.git"
+  },
+  "keywords": [
+    "slab",
+    "unslab",
+    "Buffer",
+    "memory",
+    "leak",
+    "mem",
+    "leak"
+  ],
+  "author": "Holepunch",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/holepunchto/slab-hunter/issues"
+  },
+  "homepage": "https://github.com/holepunchto/slab-hunter#readme",
+  "devDependencies": {
+    "standard": "^17.1.0"
+  },
+  "dependencies": {
+    "byte-size": "^9.0.0"
+  }
+}
