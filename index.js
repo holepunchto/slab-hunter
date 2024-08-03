@@ -149,7 +149,7 @@ class LeakOverview {
   get bigBufferOverview () {
     let res = 'Big buffer potential leaks:\n'
     for (const { amount, location, totalSize } of this.bigBufferLeaks) {
-      res += `${amount} leaks of big buffers of avg size ${byteSize(totalSize / amount)} (total: ${byteSize(totalSize)}) at ${location}\n`
+      res += `${amount} leaks of big buffers of avg size ${byteSize(totalSize / amount)} (total: ${byteSize(totalSize)}) ${location}\n`
     }
 
     return res
@@ -158,7 +158,7 @@ class LeakOverview {
   get slabOverview () {
     let res = 'Slab retainers potential leaks:\n'
     for (const { amount, normalisedTotalLeakedBytes, total, location } of this.slabLeaks) {
-      res += `${amount} leaks of avg (${byteSize(total / amount)}) (total: ${byteSize(normalisedTotalLeakedBytes)} normalised against retainers at ${location}\n`
+      res += `${amount} leaks of avg ${byteSize(total / amount)} (total: ${byteSize(normalisedTotalLeakedBytes)} normalised against retainers) ${location}\n`
     }
 
     return res
