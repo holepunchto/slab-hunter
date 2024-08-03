@@ -174,7 +174,7 @@ class LeakOverview {
   }
 }
 
-function setupSlabHunter (msLeakCutoff=DEFAULT_MS_LEAK_CUTOFF, bigBufferCutoff=DEFAULT_BIG_BUFFER_CUTOFF) {
+function setupSlabHunter (msLeakCutoff = DEFAULT_MS_LEAK_CUTOFF, bigBufferCutoff = DEFAULT_BIG_BUFFER_CUTOFF) {
   const { leakCounters, keyToSlab, slabToKeys } = monkeyPatchBuffer(msLeakCutoff, bigBufferCutoff)
 
   return () => {
