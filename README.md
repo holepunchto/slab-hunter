@@ -7,7 +7,7 @@ Warning: this is a debugging tool, do not use it in production code.
 It detects two behaviours indicative of potential memory leaks:
 - Large buffers which are long-lived
     - A typical leak here is data being loaded from a networked stream or file-system stream, where the data of a single data-event is all loaded on a shared slab, and some long-lived data is defined using `Buffer.subarray()` or similar which does not copy out the data.
-  - The solution for such a leak is to take a heap snapshot to figure out which buffers are retaining the overall slab, and to explicitly unslab those.
+  - The solution for such a leak is to take a heap snapshot to figure out which buffers are retaining the overall slab, and to explicitly [unslab](https://github.com/holepunchto/unslab) those.
 - Long-lived buffers which are part of a large slab.
     - A typical leak here is caused by using `b4a.allocUnsafe()` or `b4a.from()` for long-lived buffers. The solution is to use `b4a.allocUnsafeSlow()`
 
