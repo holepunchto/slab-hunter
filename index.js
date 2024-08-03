@@ -1,9 +1,9 @@
 const byteSize = require('byte-size')
 
-const bigBufferCutoff = 4000
-const msBeforeItIsALeak = 1000 * 60
+const DEFAULT_BIG_BUFFER_CUTOFF = 4000
+const DEFAULT_MS_LEAK_CUTOFF = 1000 * 60
 
-function monkeyPatchBuffer () {
+function monkeyPatchBuffer (msLeakCutoff, bigBufferCutoff) {
   let bufCounter = 0
   const bufMap = new Map()
   const slabToKeys = new Map()
@@ -62,7 +62,7 @@ function monkeyPatchBuffer () {
         current.bufferLengths.push(bufferLength)
         current.arrayBufferLengths.push(arrayBufferLength) // TODO: can be removed I think (we store the slab itself)
         bufMap.delete(key)
-      }, msBeforeItIsALeak)
+      }, msLeakCutoff)
       bufMap.set(key, timeout)
       registry.register(res, key)
     }
@@ -93,7 +93,7 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
       const ownSize = bufferLengths[i]
       const slabLeak = totalSlab - ownSize
 
-      if (ownSize >= bigBufferCutoff) {
+      if (ownSize >= DEFAULT_BIG_BUFFER_CUTOFF) {
         bigBuffersAmount++
         bigBuffersTotalSize += ownSize
       }
@@ -174,8 +174,8 @@ class LeakOverview {
   }
 }
 
-function setupSlabHunter () {
-  const { leakCounters, keyToSlab, slabToKeys } = monkeyPatchBuffer()
+function setupSlabHunter (msLeakCutoff=DEFAULT_MS_LEAK_CUTOFF, bigBufferCutoff=DEFAULT_BIG_BUFFER_CUTOFF) {
+  const { leakCounters, keyToSlab, slabToKeys } = monkeyPatchBuffer(msLeakCutoff, bigBufferCutoff)
 
   return () => {
     return getLeakOverview({ leakCounters, keyToSlab, slabToKeys })
