@@ -1,9 +1,71 @@
-# (WIP) Slab Hunter
+# Slab Hunter
 
 Hunt down Buffer slabs which are retaining more memory than they should.
 
 Warning: this is a debugging tool, do not use it in production code.
 
-It detects two behaviours indicative of a leak:
+It detects two behaviours indicative of potential memory leaks:
 - Large buffers which are long-lived
-- Long-lived buffers which are part of a large slab
+    - A typical leak here is data being loaded from a networked stream or file-system stream, where the data of a single data-event is all loaded on a shared slab, and some long-lived data is defined using `Buffer.subarray()` or similar which does not copy out the data.
+  - The solution for such a leak is to take a heap snapshot to figure out which buffers are retaining the overall slab, and to explicitly unslab those.
+- Long-lived buffers which are part of a large slab.
+    - A typical leak here is caused by using `b4a.allocUnsafe()` or `b4a.from()` for long-lived buffers. The solution is to use `b4a.allocUnsafeSlow()`
+
+Note: this tool works by monkey-patching `Buffer.allocUnsafe` to keep track of the state of every non-garbage-collected buffer, so memory usage and CPU will be higher than for a normal run.
+
+## Usage
+
+```
+const setupSlabHunter = require('./slab-hunter')
+
+const getLeakStats = setupSlabHunter()
+setInterval(() => {
+  console.log(getLeakStats())
+}, 1000 * 60 * 2)
+```
+
+Example output:
+
+```
+Big buffer potential leaks:
+1 leaks of big buffers of avg size 8.4 MB (total: 8.4 MB) at Object.allocUnsafe (.../node_modules/b4a/index.js:14:17)
+    at NoiseSecretStream._onrawdata (.../node_modules/@hyperswarm/secret-stream/index.js:254:33)
+    at UDXStream.emit (node:events:513:28)
+    at UDXStream.emit (node:domain:489:12)
+    at ReadableState.drain (.../node_modules/streamx/index.js:351:64)
+    at ReadableState.update (.../node_modules/streamx/index.js:361:12)
+    at ReadableState.updateReadNT (.../node_modules/streamx/index.js:543:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)
+
+...
+
+Slab retainers potential leaks:
+2013 leaks of avg 8.1 kB (total: 1.6 MB normalised against retainers) at Object.allocUnsafe (.../node_modules/b4a/index.js:14:17)
+    at UDXStream._allocWrite (.../node_modules/udx-native/lib/stream.js:430:26)
+    at UDXStream._writev (.../node_modules/udx-native/lib/stream.js:273:23)
+    at WritableState.autoBatch (.../node_modules/streamx/index.js:175:12)
+    at UDXStream._write (.../node_modules/streamx/index.js:947:25)
+    at WritableState.update (.../node_modules/streamx/index.js:187:16)
+    at WritableState.updateWriteNT (.../node_modules/streamx/index.js:550:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)
+
+...
+
+Total potential big buffer leaks: 10.7 MB
+Total potential slab-retainer leaks: 3.7 MB
+
+```
+
+## API
+
+### const getLeakStats = huntSlabs(msLeakCutoff=1000*60, bigBufferCutoff=4000)
+
+Returns a function to get the current potential leaks.
+
+`msLeakCutoff` is the amount of milliseconds untiul a buffer is tagged as potentially leaking (and will be included in the analysis).
+
+`bigBufferCutoff` is the amount of bytes from which point onwards a buffer is included in the 'big-buffer analysis'.
+
+`getLeakStats` returns an overview of the potential leaks at that time, for both big-buffer=style leaks and slab-retainer-stylke leaks.
+
+Note: the total size of a slab-retainer leak is calculated by normalising each leak against the amount of other retainers for that slab. So if a single 8kb slab is retained by 10 small buffers, each of those will report around 800 bytes leaked.
