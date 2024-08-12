@@ -4,7 +4,7 @@
   "description": "Detect Buffer slabs indicative of a memory leak",
   "main": "index.js",
   "scripts": {
-    "test": "standard"
+    "test": "standard && node --expose-gc test.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/holepunchto/slab-hunter#readme",
   "devDependencies": {
+    "brittle": "^3.6.1",
     "standard": "^17.1.0"
   },
   "dependencies": {
