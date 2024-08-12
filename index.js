@@ -78,7 +78,7 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
   for (const [location, { keys, bufferLengths, arrayBufferLengths }] of leakCounters.entries()) {
     let amount = 0
     let normalisedTotalLeakedBytes = 0
-    let total = 0
+    let totalLeakedBytes = 0
 
     let bigBuffersAmount = 0
     let bigBuffersTotalSize = 0
@@ -99,7 +99,7 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
       }
       if (slabLeak > 0) {
         amount++
-        total += slabLeak
+        totalLeakedBytes += slabLeak
         const totalRetainers = slabToKeys.get(slab).size
         normalisedTotalLeakedBytes += slabLeak / totalRetainers
       }
@@ -107,7 +107,7 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
 
     if (amount > 0) {
       slabLeaks.push({
-        location, normalisedTotalLeakedBytes, amount, total
+        location, normalisedTotalLeakedBytes, amount, totalLeakedBytes
       })
     }
 
@@ -157,8 +157,8 @@ class LeakOverview {
 
   get slabOverview () {
     let res = 'Slab retainers potential leaks:\n'
-    for (const { amount, normalisedTotalLeakedBytes, total, location } of this.slabLeaks) {
-      res += `${amount} leaks of avg ${byteSize(total / amount)} (total: ${byteSize(normalisedTotalLeakedBytes)} normalised against retainers) ${location}\n`
+    for (const { amount, normalisedTotalLeakedBytes, totalLeakedBytes, location } of this.slabLeaks) {
+      res += `${amount} leaks of avg ${byteSize(totalLeakedBytes / amount)} (total: ${byteSize(normalisedTotalLeakedBytes)} normalised against retainers) ${location}\n`
     }
 
     return res

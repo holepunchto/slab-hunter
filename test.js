@@ -1,6 +1,8 @@
 const test = require('brittle')
 const setupSlabHunter = require('.')
 
+const DEBUG = false
+
 test('slab leaks are detected', async (t) => {
   const leakCutoffMs = 0 // no delay to simplify test
   const getLeaks = setupSlabHunter(leakCutoffMs)
@@ -34,6 +36,8 @@ test('slab leaks are detected', async (t) => {
 
   {
     const leaks = getLeaks()
+    if (DEBUG) console.log(leaks)
+
     t.is(leaks.bigBufferLeaks.length, 0, 'no big-buffer leaks')
     t.is(leaks.slabLeaks.length, 1, 'slab leak detected')
     t.is(leaks.slabLeaks[0].amount, 10, 'all 10 leaks are detected')
@@ -73,6 +77,8 @@ test('big-buffer leaks are detected', async (t) => {
 
   {
     const leaks = getLeaks()
+    if (DEBUG) console.log(leaks)
+
     t.is(leaks.bigBufferLeaks.length, 1, 'big-buffer leak detected')
     t.is(leaks.bigBufferLeaks[0].amount, 10, 'all 10 leaks are detected')
     t.is(leaks.slabLeaks.length, 0, 'no slab leaks detected')
