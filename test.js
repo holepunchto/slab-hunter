@@ -14,7 +14,7 @@ test('slab leaks are detected', async (t) => {
   const retainedBuffers = []
   let nonRetainedBuffers = []
   for (let i = 0; i < 1000; i++) {
-    // DEVNOTE: apparently storing a const inside the loop and storing it
+    // DEVNOTE: apparently defining a const inside the loop and storing it
     // conditionally retains the last instance of that const, also after the
     // for loop and a gc run. (curious why)
     // To simplify the test, we do not define any variables inside the for loop
@@ -53,7 +53,7 @@ test('big-buffer leaks are detected', async (t) => {
   const retainedBuffers = []
   let nonRetainedBuffers = []
   for (let i = 0; i < 1000; i++) {
-    // DEVNOTE: apparently storing a const inside the loop and storing it
+    // DEVNOTE: apparently defining a const inside the loop and storing it
     // conditionally retains the last instance of that const, also after the
     // for loop and a gc run. (curious why)
     // To simplify the test, we do not define any variables inside the for loop
