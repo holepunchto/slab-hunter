@@ -58,7 +58,7 @@ Total potential slab-retainer leaks: 3.7 MB
 
 ## API
 
-### const getLeakStats = setupSlabHunter(msLeakCutoff=1000*60, bigBufferCutoff=4000)
+### `const getLeakStats = setupSlabHunter(msLeakCutoff=1000*60, bigBufferCutoff=4000)`
 
 Returns a function to get the current potential leaks.
 
@@ -70,7 +70,7 @@ Returns a function to get the current potential leaks.
 
 Note: the total size of a slab-retainer leak is calculated by normalising each leak against the amount of other retainers for that slab (their `normalisedTotalLeakedBytes` value). So if a single 8kb slab is retained by 10 small buffers, each of those will report around 800 bytes leaked.
 
-### leakOverview.bigBufferLeaks
+### `leakOverview.bigBufferLeaks`
 
 Returns a list of big-buffer leaks. Each entry is an object:
 ```
@@ -81,7 +81,7 @@ Returns a list of big-buffer leaks. Each entry is an object:
 }
 ```
 
-### leakOverview.slabLeaks
+### `leakOverview.slabLeaks`
 
 Returns a list of slab leaks. Each entry is an object:
 
