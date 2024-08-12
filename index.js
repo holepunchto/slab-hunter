@@ -81,7 +81,7 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
     let totalLeakedBytes = 0
 
     let bigBuffersAmount = 0
-    let bigBuffersTotalSize = 0
+    let bigBuffersTotalLeakedBytes = 0
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
@@ -95,7 +95,7 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
 
       if (ownSize >= DEFAULT_BIG_BUFFER_CUTOFF) {
         bigBuffersAmount++
-        bigBuffersTotalSize += ownSize
+        bigBuffersTotalLeakedBytes += ownSize
       }
       if (slabLeak > 0) {
         amount++
@@ -112,12 +112,12 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
     }
 
     if (bigBuffersAmount > 0) {
-      bigBufferLeaks.push({ amount: bigBuffersAmount, totalSize: bigBuffersTotalSize, location })
+      bigBufferLeaks.push({ amount: bigBuffersAmount, totalLeakedBytes: bigBuffersTotalLeakedBytes, location })
     }
   }
 
   slabLeaks.sort((e1, e2) => e1.normalisedTotalLeakedBytes < e2.normalisedTotalLeakedBytes ? 1 : e1.normalisedTotalLeakedBytes > e2.normalisedTotalLeakedBytes ? -1 : 0)
-  bigBufferLeaks.sort((e1, e2) => e1.totalSize < e2.totalSize ? 1 : e1.totalSize > e2.totalSize ? -1 : 0)
+  bigBufferLeaks.sort((e1, e2) => e1.totalLeakedBytes < e2.totalLeakedBytes ? 1 : e1.totalLeakedBytes > e2.totalLeakedBytes ? -1 : 0)
 
   return new LeakOverview(bigBufferLeaks, slabLeaks)
 }
@@ -139,8 +139,8 @@ class LeakOverview {
 
   get totalBigBufferLeaks () {
     let res = 0
-    for (const { totalSize } of this.bigBufferLeaks) {
-      res += totalSize
+    for (const { totalLeakedBytes } of this.bigBufferLeaks) {
+      res += totalLeakedBytes
     }
 
     return res
@@ -148,8 +148,8 @@ class LeakOverview {
 
   get bigBufferOverview () {
     let res = 'Big buffer potential leaks:\n'
-    for (const { amount, location, totalSize } of this.bigBufferLeaks) {
-      res += `${amount} leaks of big buffers of avg size ${byteSize(totalSize / amount)} (total: ${byteSize(totalSize)}) ${location}\n`
+    for (const { amount, location, totalLeakedBytes } of this.bigBufferLeaks) {
+      res += `${amount} leaks of big buffers of avg size ${byteSize(totalLeakedBytes / amount)} (total: ${byteSize(totalLeakedBytes)}) ${location}\n`
     }
 
     return res

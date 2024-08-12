@@ -77,7 +77,7 @@ Returns a list of big-buffer leaks. Each entry is an object:
 {
   location, // The stack trace where the leaking buffer was created (this is the unique key for this leak)
   amount, // the amount of leaks created at the location
-  totalSize // the total size of the leak (summed across all its ocurrences), in bytes
+  totalLeakedBytes // the total amount of leaked bytes (summed across all its ocurrences)
 }
 ```
 

@@ -1,7 +1,7 @@
 const test = require('brittle')
 const setupSlabHunter = require('.')
 
-const DEBUG = false
+const DEBUG = true
 
 test('slab leaks are detected', async (t) => {
   const leakCutoffMs = 0 // no delay to simplify test
