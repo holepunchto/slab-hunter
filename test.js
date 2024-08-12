@@ -40,7 +40,7 @@ test('slab leaks are detected', async (t) => {
   }
 })
 
-test.solo('big-buffer leaks are detected', async (t) => {
+test('big-buffer leaks are detected', async (t) => {
   const leakCutoffMs = 0 // no delay to simplify test
   const getLeaks = setupSlabHunter(leakCutoffMs)
 
