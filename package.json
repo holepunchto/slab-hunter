@@ -1,6 +1,6 @@
 {
   "name": "slab-hunter",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Detect Buffer slabs indicative of a memory leak",
   "main": "index.js",
   "scripts": {
