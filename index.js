@@ -164,13 +164,17 @@ class LeakOverview {
     return res
   }
 
-  [Symbol.for('nodejs.util.inspect.custom')] () { // aka toString
+  toString () {
     return [
       this.bigBufferOverview,
       this.slabOverview,
       `Total potential big buffer leaks: ${byteSize(this.totalBigBufferLeaks)}`,
       `Total potential slab-retainer leaks: ${byteSize(this.totalSlabLeaks)}`
     ].join('\n')
+  }
+
+  [Symbol.for('nodejs.util.inspect.custom')] () {
+    return this.toString()
   }
 }
 
