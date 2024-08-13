@@ -16,7 +16,7 @@ Note: this tool works by monkey-patching `Buffer.allocUnsafe` to keep track of t
 ## Usage
 
 ```
-const setupSlabHunter = require('./slab-hunter')
+const setupSlabHunter = require('slab-hunter')
 
 const getLeakStats = setupSlabHunter()
 setInterval(() => {
