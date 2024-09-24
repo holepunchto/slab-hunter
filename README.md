@@ -2,18 +2,40 @@
 
 Hunt down Buffer slabs which are retaining more memory than they should.
 
+
+
 Warning: this is a debugging tool, do not use it in production code.
 
 It detects two behaviours indicative of potential memory leaks:
-- Large buffers which are long-lived
+- Slab retainers: long-lived buffers which are part of a slab.
+    - A typical leak here is caused by using `Buffer.allocUnsafe()` or `Buffer.from()` for long-lived buffers.
+    - The solution is to [unslab](https://github.com/holepunchto/unslab) the buffers, or to use `b4a.allocUnsafeSlow()` instead.
+- Big buffers which are long-lived
     - A typical leak here is data being loaded from a networked stream or file-system stream, where the data of a single data-event is all loaded on a shared slab, and some long-lived data is defined using `Buffer.subarray()` or similar, which does not copy out the data.
-  - The solution for such a leak is to take a heap snapshot, based on which you can figure out which buffers are retaining the overall slab, and to explicitly [unslab](https://github.com/holepunchto/unslab) those.
-- Long-lived buffers which are part of a large slab.
-    - A typical leak here is caused by using `b4a.allocUnsafe()` or `b4a.from()` for long-lived buffers. The solution is to use `b4a.allocUnsafeSlow() instead.`
+    - The solution for such a leak is to take a heap snapshot, based on which you can figure out which buffers are retaining the overall slab, and to explicitly [unslab](https://github.com/holepunchto/unslab) those.
+    - Note: susceptible to false positives (there can be good reasons to have large buffers)
 
 Note: this tool works by monkey-patching `Buffer.allocUnsafe` to keep track of the state of every non-garbage-collected buffer, so memory usage and CPU will be higher than for a normal run.
 
 ## Usage
+
+### CLI
+
+```
+npm i -g slab-hunter
+slab-hunter <entrypoint>
+```
+
+Where `<entrypoint>` is the entrypoint of the program you wish to test. 
+
+For example:
+```
+slab-hunter index.js
+```
+
+Information about the potential leaks will be logged every 2 minutes.
+
+### Programmatic
 
 ```
 const setupSlabHunter = require('slab-hunter')
@@ -24,7 +46,7 @@ setInterval(() => {
 }, 1000 * 60 * 2)
 ```
 
-Example output:
+## Example Output
 
 ```
 Big buffer potential leaks:
