@@ -2,8 +2,6 @@
 
 Hunt down Buffer slabs which are retaining more memory than they should.
 
-
-
 Warning: this is a debugging tool, do not use it in production code.
 
 It detects two behaviours indicative of potential memory leaks:
@@ -46,7 +44,7 @@ setInterval(() => {
 }, 1000 * 60 * 2)
 ```
 
-## Example Output
+### Example Output
 
 ```
 Big buffer potential leaks:
