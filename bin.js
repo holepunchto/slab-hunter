@@ -16,6 +16,6 @@ console.log(`Printing leak info every ${logInterval / 1000} seconds`)
 const getLeakStats = setupSlabHunter()
 setInterval(() => {
   console.log(getLeakStats().toString())
-}, logInterval)
+}, logInterval).unref()
 
 require(entryPoint)
