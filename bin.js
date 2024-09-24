@@ -1,5 +1,5 @@
 const path = require('path')
-const setupSlabHunter = require('./index')
+const setupSlabHunter = require('./')
 
 if (!process.argv[2]) {
   console.error('Usage: slab-hunter <entrypoint> (for example: slab-hunter index.js)')
