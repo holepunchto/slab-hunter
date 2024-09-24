@@ -29,7 +29,8 @@
   },
   "homepage": "https://github.com/holepunchto/slab-hunter#readme",
   "files": [
-    "index.js"
+    "index.js",
+    "bin.js"
   ],
   "devDependencies": {
     "brittle": "^3.6.1",
