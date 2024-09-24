@@ -6,6 +6,9 @@
   "scripts": {
     "test": "standard && node --expose-gc test.js"
   },
+  "bin": {
+    "slab-hunter": "./bin.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/holepunchto/slab-hunter.git"
