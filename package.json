@@ -4,7 +4,8 @@
   "description": "Detect Buffer slabs indicative of a memory leak",
   "main": "index.js",
   "scripts": {
-    "test": "standard && node --expose-gc test.js"
+    "format": "prettier --write .",
+    "test": "prettier --check . && lunte && node --expose-gc test.js"
   },
   "bin": {
     "slab-hunter": "./bin.js"
@@ -34,7 +35,9 @@
   ],
   "devDependencies": {
     "brittle": "^3.6.1",
-    "standard": "^17.1.0"
+    "lunte": "^1.6.0",
+    "prettier": "^3.6.2",
+    "prettier-config-holepunch": "^2.0.0"
   },
   "dependencies": {
     "byte-size": "^9.0.0"
