@@ -32,7 +32,7 @@ test('slab leaks are detected', async (t) => {
   t.is(retainedBuffers.length, 10, 'sanity check: 10 retained buffers')
 
   global.gc() // assumes node is run with --expose-gc flag
-  await new Promise(resolve => setTimeout(resolve, 100))
+  await new Promise((resolve) => setTimeout(resolve, 100))
 
   {
     const leaks = getLeaks()
@@ -63,9 +63,9 @@ test('big-buffer leaks are detected', async (t) => {
     // To simplify the test, we do not define any variables inside the for loop
     Buffer.allocUnsafe(100)
     if (i % 100 === 0) {
-      retainedBuffers.push(Buffer.allocUnsafe(10_000))
+      retainedBuffers.push(Buffer.allocUnsafe(Buffer.poolSize)) // needs at least half of the poolsize to get its dedicated buffer
     } else {
-      nonRetainedBuffers.push(Buffer.allocUnsafe(10_000))
+      nonRetainedBuffers.push(Buffer.allocUnsafe(Buffer.poolSize))
     }
   }
 
@@ -73,7 +73,7 @@ test('big-buffer leaks are detected', async (t) => {
   t.is(retainedBuffers.length, 10, 'sanity check: 10 retained buffers')
 
   global.gc() // assumes node is run with --expose-gc flag
-  await new Promise(resolve => setTimeout(resolve, 100))
+  await new Promise((resolve) => setTimeout(resolve, 100))
 
   {
     const leaks = getLeaks()

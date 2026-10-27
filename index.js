@@ -3,7 +3,7 @@ const byteSize = require('byte-size')
 const DEFAULT_BIG_BUFFER_CUTOFF = 4000
 const DEFAULT_MS_LEAK_CUTOFF = 1000 * 60
 
-function monkeyPatchBuffer (msLeakCutoff, bigBufferCutoff) {
+function monkeyPatchBuffer(msLeakCutoff, bigBufferCutoff) {
   let bufCounter = 0
   const bufMap = new Map()
   const slabToKeys = new Map()
@@ -26,13 +26,13 @@ function monkeyPatchBuffer (msLeakCutoff, bigBufferCutoff) {
 
   const originalAllocUnsafe = Buffer.allocUnsafe
 
-  Buffer.allocUnsafe = function allocUnsafeMonkeyPatch (...args) {
+  Buffer.allocUnsafe = function allocUnsafeMonkeyPatch(...args) {
     const res = originalAllocUnsafe(...args)
 
     const isBigBuffer = res.byteLength >= bigBufferCutoff
     const isPotentialSlabRetainer = res.buffer.byteLength >= 10 * res.byteLength // Note: pretty ad-hoc cut-off
     if (isBigBuffer || isPotentialSlabRetainer) {
-      const trace = (new Error()).stack
+      const trace = new Error().stack
       const key = bufCounter++
       const slab = res.buffer
 
@@ -72,7 +72,7 @@ function monkeyPatchBuffer (msLeakCutoff, bigBufferCutoff) {
   return { leakCounters, keyToSlab, slabToKeys }
 }
 
-function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
+function getLeakOverview({ leakCounters, keyToSlab, slabToKeys }) {
   const slabLeaks = []
   const bigBufferLeaks = []
   for (const [location, { keys, bufferLengths, arrayBufferLengths }] of leakCounters.entries()) {
@@ -107,28 +107,47 @@ function getLeakOverview ({ leakCounters, keyToSlab, slabToKeys }) {
 
     if (amount > 0) {
       slabLeaks.push({
-        location, normalisedTotalLeakedBytes, amount, totalLeakedBytes
+        location,
+        normalisedTotalLeakedBytes,
+        amount,
+        totalLeakedBytes
       })
     }
 
     if (bigBuffersAmount > 0) {
-      bigBufferLeaks.push({ amount: bigBuffersAmount, totalLeakedBytes: bigBuffersTotalLeakedBytes, location })
+      bigBufferLeaks.push({
+        amount: bigBuffersAmount,
+        totalLeakedBytes: bigBuffersTotalLeakedBytes,
+        location
+      })
     }
   }
 
-  slabLeaks.sort((e1, e2) => e1.normalisedTotalLeakedBytes < e2.normalisedTotalLeakedBytes ? 1 : e1.normalisedTotalLeakedBytes > e2.normalisedTotalLeakedBytes ? -1 : 0)
-  bigBufferLeaks.sort((e1, e2) => e1.totalLeakedBytes < e2.totalLeakedBytes ? 1 : e1.totalLeakedBytes > e2.totalLeakedBytes ? -1 : 0)
+  slabLeaks.sort((e1, e2) =>
+    e1.normalisedTotalLeakedBytes < e2.normalisedTotalLeakedBytes
+      ? 1
+      : e1.normalisedTotalLeakedBytes > e2.normalisedTotalLeakedBytes
+        ? -1
+        : 0
+  )
+  bigBufferLeaks.sort((e1, e2) =>
+    e1.totalLeakedBytes < e2.totalLeakedBytes
+      ? 1
+      : e1.totalLeakedBytes > e2.totalLeakedBytes
+        ? -1
+        : 0
+  )
 
   return new LeakOverview(bigBufferLeaks, slabLeaks)
 }
 
 class LeakOverview {
-  constructor (bigBufferLeaks, slabLeaks) {
+  constructor(bigBufferLeaks, slabLeaks) {
     this.bigBufferLeaks = bigBufferLeaks
     this.slabLeaks = slabLeaks
   }
 
-  get totalSlabLeaks () {
+  get totalSlabLeaks() {
     let res = 0
     for (const { normalisedTotalLeakedBytes } of this.slabLeaks) {
       res += normalisedTotalLeakedBytes // todo: put in analysis
@@ -137,7 +156,7 @@ class LeakOverview {
     return res
   }
 
-  get totalBigBufferLeaks () {
+  get totalBigBufferLeaks() {
     let res = 0
     for (const { totalLeakedBytes } of this.bigBufferLeaks) {
       res += totalLeakedBytes
@@ -146,7 +165,7 @@ class LeakOverview {
     return res
   }
 
-  get bigBufferOverview () {
+  get bigBufferOverview() {
     let res = 'Big buffer potential leaks:\n'
     for (const { amount, location, totalLeakedBytes } of this.bigBufferLeaks) {
       res += `${amount} leaks of big buffers of avg size ${byteSize(totalLeakedBytes / amount)} (total: ${byteSize(totalLeakedBytes)}) ${location}\n`
@@ -155,16 +174,17 @@ class LeakOverview {
     return res
   }
 
-  get slabOverview () {
+  get slabOverview() {
     let res = 'Slab retainers potential leaks:\n'
-    for (const { amount, normalisedTotalLeakedBytes, totalLeakedBytes, location } of this.slabLeaks) {
+    for (const { amount, normalisedTotalLeakedBytes, totalLeakedBytes, location } of this
+      .slabLeaks) {
       res += `${amount} leaks of avg ${byteSize(totalLeakedBytes / amount)} (total: ${byteSize(normalisedTotalLeakedBytes)} normalised against retainers) ${location}\n`
     }
 
     return res
   }
 
-  toString () {
+  toString() {
     return [
       this.bigBufferOverview,
       this.slabOverview,
@@ -173,12 +193,15 @@ class LeakOverview {
     ].join('\n')
   }
 
-  [Symbol.for('nodejs.util.inspect.custom')] () {
+  [Symbol.for('nodejs.util.inspect.custom')]() {
     return this.toString()
   }
 }
 
-function setupSlabHunter (msLeakCutoff = DEFAULT_MS_LEAK_CUTOFF, bigBufferCutoff = DEFAULT_BIG_BUFFER_CUTOFF) {
+function setupSlabHunter(
+  msLeakCutoff = DEFAULT_MS_LEAK_CUTOFF,
+  bigBufferCutoff = DEFAULT_BIG_BUFFER_CUTOFF
+) {
   const { leakCounters, keyToSlab, slabToKeys } = monkeyPatchBuffer(msLeakCutoff, bigBufferCutoff)
 
   return () => {
